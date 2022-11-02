@@ -6,11 +6,41 @@ import {
   StyleSheet,
   SafeAreaView,
   TextInput,
+  FlatList,
+  ListRenderItemInfo,
 } from 'react-native';
-import React from 'react';
+import React, {useContext, useState} from 'react';
 import TaskList from '../../components/task';
+import 'react-native-get-random-values';
+import {v4 as uuidv4} from 'uuid';
+import {TasksContext} from '../../context/TasksContext';
+
+interface Task {
+  id: string;
+  title: string;
+  done: boolean;
+}
 
 export default function Home() {
+  const {tasks, addTask} = useContext(TasksContext);
+  const [currentValue, setCurrentValue] = useState('');
+
+  const handleTask = () => {
+    if (currentValue === '') {
+      return;
+    }
+
+    const data = {
+      id: uuidv4(),
+      title: currentValue,
+      done: false,
+    };
+
+    addTask(data);
+
+    setCurrentValue('');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -19,12 +49,23 @@ export default function Home() {
           style={styles.input}
           placeholder="Nova tarefa"
           placeholderTextColor="#f1f1f1"
+          onChangeText={setCurrentValue}
+          value={currentValue}
         />
-        <TouchableOpacity style={styles.button} activeOpacity={0.7}>
-          <Text style={styles.buttonText}>Entrar</Text>
+        <TouchableOpacity
+          style={styles.button}
+          activeOpacity={0.7}
+          onPress={handleTask}>
+          <Text style={styles.buttonText}>Add Task</Text>
         </TouchableOpacity>
         <Text style={styles.title}>My Tasks</Text>
-        <TaskList />
+        <FlatList
+          data={tasks}
+          keyExtractor={(item: Task) => item.id}
+          renderItem={({item}: ListRenderItemInfo<Task>) => (
+            <TaskList title={item.title} done={item.done} />
+          )}
+        />
       </View>
     </SafeAreaView>
   );
@@ -44,9 +85,11 @@ const styles = StyleSheet.create({
     color: '#f1f1f1',
     fontSize: 18,
     fontWeight: 'bold',
+    marginTop: 20,
   },
   input: {
     marginTop: Platform.OS === 'ios' ? 15 : 20,
+    paddingVertical: Platform.OS === 'ios' ? 15 : 10,
     backgroundColor: '#29292e',
     color: '#f1f1f1',
     paddingHorizontal: 15,
