@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface iTasksContext {
-  task: ITask[];
+  tasks: ITask[];
   addTask(task: ITask): void;
 }
 
@@ -15,14 +15,19 @@ interface IProps {
   children: React.ReactElement;
 }
 
-export const TasksContext = React.createContext<iTasksContext>(defaultValue: iTasksContext);
+const DEFAULT_CONTEXT: iTasksContext = {
+  tasks: [],
+  addTask: () => {},
+};
+
+export const TasksContext = React.createContext<iTasksContext>(DEFAULT_CONTEXT);
 
 export const TasksProvider: React.FunctionComponent<IProps> = ({children}) => {
   const addTask = (task: ITask) => {
     console.log('addTask action ', task.title);
   };
 
-  const tasks: ITask[] = [{id: '1', title: 'Comprar pão', done: false}];
+  const tasks: ITask[] = [];
 
   return (
     <TasksContext.Provider value={{tasks, addTask}}>
